@@ -275,7 +275,7 @@ export function TextOp({
     const guard = guardLargeInput(text.length);
     if (!guard.ok) {
       setResult(null);
-      setError(guard.message);
+      setError(guard.error ?? "Input is too large.");
       return;
     }
     try {
@@ -488,7 +488,7 @@ export function Units({
   const [to, setTo] = useState(defTo ?? units[1]?.id ?? units[0]?.id ?? "");
   const [copied, copy] = useCopied();
 
-  const result = useMemo(() => {
+  const result: { error: string } | { value: string } = useMemo(() => {
     const v = Number(String(amount).replace(/,/g, ""));
     if (!Number.isFinite(v)) return { error: "Enter a valid number." };
     if (convert) {

@@ -121,6 +121,22 @@ import {
 } from "./workspaces/CalculatorWorkspaces";
 import { getTool } from "@/data/tools";
 import { ToolUseTracker } from "../analytics/Analytics";
+import { datetimeRegistry } from "./workspaces/DateTimeWorkspaces";
+import { techextraRegistry } from "./workspaces/TechExtraWorkspaces";
+import { calcplusRegistry } from "./workspaces/CalcPlusWorkspaces";
+import { mediaextraRegistry } from "./workspaces/MediaExtraWorkspaces";
+import { moneybizRegistry } from "./workspaces/MoneyBizWorkspaces";
+import { lifetoolsRegistry } from "./workspaces/LifeToolsWorkspaces";
+import { pdfplusRegistry } from "./workspaces/PdfPlusWorkspaces";
+import { dataplusRegistry } from "./workspaces/DataPlusWorkspaces";
+import { secnetRegistry } from "./workspaces/SecNetWorkspaces";
+import { socialseoRegistry } from "./workspaces/SocialSeoWorkspaces";
+import { writingresumeRegistry } from "./workspaces/WritingResumeWorkspaces";
+import { qrgenRegistry } from "./workspaces/QrGenWorkspaces";
+import { audioRegistry } from "./workspaces/AudioWorkspaces";
+import { audiofxRegistry } from "./workspaces/AudioFxWorkspaces";
+import { audiogenRegistry } from "./workspaces/AudioGenWorkspaces";
+import { audioplusRegistry } from "./workspaces/AudioPlusWorkspaces";
 
 function UpperCaseTool() { return <CaseConverterTool defaultMode="upper" />; }
 function LowerCaseTool() { return <CaseConverterTool defaultMode="lower" />; }
@@ -241,6 +257,22 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "compound-interest": CompoundInterestTool,
   "simple-interest": SimpleInterestTool,
   "time-duration": TimeDurationTool,
+  ...datetimeRegistry,
+  ...techextraRegistry,
+  ...calcplusRegistry,
+  ...mediaextraRegistry,
+  ...moneybizRegistry,
+  ...lifetoolsRegistry,
+  ...pdfplusRegistry,
+  ...dataplusRegistry,
+  ...secnetRegistry,
+  ...socialseoRegistry,
+  ...writingresumeRegistry,
+  ...qrgenRegistry,
+  ...audioRegistry,
+  ...audiofxRegistry,
+  ...audiogenRegistry,
+  ...audioplusRegistry,
 };
 
 /** True when a slug has a real working implementation (never faked). */

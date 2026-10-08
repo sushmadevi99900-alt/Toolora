@@ -7,6 +7,18 @@ import { calculatorTools } from "./catalog/calculators";
 import { converterTools } from "./catalog/converters";
 import { generatorTools } from "./catalog/generators";
 import { utilityTools } from "./catalog/utilities";
+import { datetimeTools } from "./catalog/datetime";
+import { techextraTools } from "./catalog/techextra";
+import { calcplusTools } from "./catalog/calcplus";
+import { mediaextraTools } from "./catalog/mediaextra";
+import { moneybizTools } from "./catalog/moneybiz";
+import { lifetoolsTools } from "./catalog/lifetools";
+import { creatorsTools } from "./catalog/creators";
+import { docdataTools } from "./catalog/docdata";
+import { qrgenTools } from "./catalog/qrgen";
+import { audioTools } from "./catalog/audio";
+import { audiogenTools } from "./catalog/audio2";
+import { audioplusTools } from "./catalog/audio3";
 
 export const tools: ToolDefinition[] = [
   ...imageTools,
@@ -17,7 +29,27 @@ export const tools: ToolDefinition[] = [
   ...converterTools,
   ...generatorTools,
   ...utilityTools,
+  ...datetimeTools,
+  ...techextraTools,
+  ...calcplusTools,
+  ...mediaextraTools,
+  ...moneybizTools,
+  ...lifetoolsTools,
+  ...creatorsTools,
+  ...docdataTools,
+  ...qrgenTools,
+  ...audioTools,
+  ...audiogenTools,
+  ...audioplusTools,
 ];
+
+// Auto-fill empty relatedTools with same-category tools so every page has
+// useful related links without hand-maintaining hundreds of lists.
+for (const t of tools) {
+  if (t.relatedTools.length === 0) {
+    t.relatedTools = tools.filter((x) => x.category === t.category && x.slug !== t.slug).slice(0, 4).map((x) => x.slug);
+  }
+}
 
 export const toolMap: Record<string, ToolDefinition> = Object.fromEntries(
   tools.map((t) => [t.slug, t]),
@@ -69,9 +101,36 @@ function scoreTool(t: ToolDefinition, q: string): number {
  * Ranked multi-term search across name, slug, aliases, keywords,
  * description and category. Every term must match somewhere.
  */
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  photo: ["image", "picture"],
+  photos: ["image", "picture"],
+  picture: ["image", "photo"],
+  pictures: ["image", "photo"],
+  compress: ["compressor", "compress"],
+  convert: ["converter", "convert"],
+  calculate: ["calculator", "calculation", "compute"],
+  emi: ["loan"],
+  qr: ["qr"],
+  audio: ["audio", "sound", "voice"],
+  record: ["recorder", "recording"],
+  voice: ["audio", "recorder"],
+  mp3: ["audio"],
+  json: ["json"],
+  pretty: ["formatter", "format"],
+  unix: ["unix", "timestamp", "epoch"],
+  time: ["time", "date", "timestamp"],
+  password: ["password"],
+  wifi: ["wifi", "qr"],
+  mortgage: ["mortgage", "loan"],
+  invoice: ["invoice"],
+  gpa: ["gpa", "grade"],
+};
+
 export function searchTools(query: string, limit = 50): ToolDefinition[] {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  if (terms.length === 0) return [];
+  const raw = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (raw.length === 0) return [];
+  // Expand common wording so "compress photo" finds the Image Compressor.
+  const terms = [...new Set(raw.flatMap((t) => [t, ...(SEARCH_SYNONYMS[t] ?? [])]))];
   const haystack = (t: ToolDefinition) =>
     [t.name, t.slug, t.shortDescription, t.longDescription, t.category, ...t.keywords, ...(t.aliases ?? [])]
       .join(" ")
@@ -79,8 +138,10 @@ export function searchTools(query: string, limit = 50): ToolDefinition[] {
   return tools
     .map((t) => {
       const hay = haystack(t);
-      if (!terms.every((term) => hay.includes(term))) return { t, score: 0 };
-      const first = terms[0] as string;
+      // At least one expansion of every raw term must match.
+      const ok = raw.every((rt) => hay.includes(rt) || (SEARCH_SYNONYMS[rt] ?? []).some((s) => hay.includes(s)));
+      if (!ok) return { t, score: 0 };
+      const first = raw[0] as string;
       const score =
         terms.reduce((sum, term) => sum + scoreTool(t, term), 0) +
         (t.isPopular ? 3 : 0) +
